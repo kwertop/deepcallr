@@ -1,0 +1,30 @@
+{
+  "name": "Meetheon",
+  "description": "Transribe and Summarize Google Meet meetings",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": [
+    "storage",
+    "downloads",
+    "tabs"
+  ],
+  "content_scripts": [
+  	{
+  		"matches": ["https://meet.google.com/*"],
+      "js": ["jquery-3.6.0.min.js", "jquery-ui.min.js", "bootstrap.bundle.min.js", "script.js", "contentScript.js"],
+      "css": ["style.css", "jquery-ui.min.css", "bootstrap.min.css"]
+  	}
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "drag.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [ "download.png", "drag.png", "drag.svg", "download.svg", "newspaper.png", "newspaper.svg" ],
+      "matches": [ "https://meet.google.com/*" ]
+    }
+  ]
+}

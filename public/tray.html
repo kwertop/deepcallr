@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Callr</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/solid.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.socket.io/4.2.0/socket.io.min.js" integrity="sha384-PiBR5S00EtOj2Lto9Uu81cmoyZqR57XcOna1oAuVuIEjzj0wpqDVfD0JA9eXlRsj" crossorigin="anonymous"></script>
+    <script src="recorder.min.js"></script>
+    <!-- <script src="encoderWorker.min.js"></script> -->
+    <script type="text/javascript" src="script.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <input type="checkbox" id="click">
+    <label for="click">
+      <i class="fab fa-solid fa-scroll"></i>
+      <i class="fas fa-times"></i>
+    </label>
+    <div class="wrapper">
+      <div class="head-text">
+        Callr
+      </div>
+      <div class="language-screen">
+        <div class="label-div">
+          Please Choose a Language
+        </div>
+        <div class="lang-select-div">
+          <select class="lang-select" aria-label="Default select example">
+            <option selected>English - IN</option>
+            <option value="1">English - US</option>
+            <option value="2">Hindi</option>
+            <option value="3">Spanish</option>
+            <option value="3">French</option>
+            <option value="3">Korean</option>
+          </select>
+        </div>
+        <div class="submit-div">
+          <button class="btn btn-primary submit-button">
+            Submit
+          </button>
+        </div>
+      </div>
+      <div class="transcribe-area" style="display: none;">
+        <div class="tray">
+          <button class='button play' id='btn-play'>          
+            <!-- <i class="iplay fa-solid fa-circle-play" id="icon-play"></i> -->
+            <i class="iplay fa-solid fa-microphone-lines" id="icon-play" style="display: none;"></i>
+            <!-- <i class="iplay fa-solid fa-circle-pause" id="icon-pause" style="display: none;"></i> -->
+            <i class="iplay fa-solid fa-microphone-lines-slash" id="icon-pause"></i>
+          </button>
+          <button class='button play'>
+            <i class="iplay fa-solid fa-circle-stop"></i>
+          </button>
+          <button class='button play'>
+            <i class="iplay fa-solid fa-up-right-from-square"></i>
+          </button>
+          <button class='button play'>
+            <i class="iplay fa-solid fa-closed-captioning"></i>
+          </button>
+          <button class='button play'>
+            <i class="iplay fa-solid fa-file-lines"></i>
+          </button>
+        </div>
+        <div class="desc-text" id="time-text">
+        </div>
+        <div class="transcript-area">
+        </div>
+        <!-- <div class="chat-box">
+          <div class="desc-text">
+            Please fill out the form below to start chatting with the next available agent.
+          </div>
+          <form action="#">
+            <div class="field">
+              <input type="text" placeholder="Your Name" required>
+            </div>
+            <div class="field">
+              <input type="email" placeholder="Email Address" required>
+            </div>
+            <div class="field textarea">
+              <textarea cols="30" rows="10" placeholder="Explain your queries.." required></textarea>
+            </div>
+            <div class="field">
+              <button type="submit">Start Chat</button>
+            </div>
+          </form>
+        </div> -->
+      </div>
+    </div>
+  </body>
+</html>
