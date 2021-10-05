@@ -1,5 +1,5 @@
 function showTime() {
-	var monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec" ];
+  var monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec" ];
   var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   var date = new Date();
   var wd = days[date.getDay()];
@@ -25,10 +25,13 @@ function showTime() {
   s = (s < 10) ? "0" + s : s;
   
   var time = wd + ", " + mo + " " + d + " " + y + ". " + h + ":" + m + ":" + s + " " + session;
-  document.getElementById("time-text").innerText = time;
-  document.getElementById("time-text").textContent = time;
+  let node = document.getElementById("time-text");
+  if(node) {
+    node.innerText = time;
+    node.textContent = time;
   
-  setTimeout(showTime, 1000);
+    setTimeout(showTime, 1000);
+  }
 }
 
 function isChrome() {

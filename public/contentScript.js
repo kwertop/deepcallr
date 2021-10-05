@@ -11,9 +11,6 @@
   var jqueryCss = chrome.runtime.getURL("jquery-ui.min.css");
   $('<link rel="stylesheet" type="text/css" href="' + jqueryCss + '" >').appendTo("head");
 
-  var bootstrapMinJs = chrome.runtime.getURL("bootstrap.bundle.min.js");
-  $('<script type="text/javascript" href="' + bootstrapMinJs + '" ></script>').appendTo("head");
-
   var jqueryUiJs = chrome.runtime.getURL("jquery-ui.min.js");
   $('<script type="text/javascript" href="' + jqueryUiJs + '" ></script>').appendTo("head");
 
@@ -23,13 +20,61 @@
   var myscriptJs = chrome.runtime.getURL("script.js");
   $('<script type="text/javascript" href="' + myscriptJs + '" ></script>').appendTo("head");
 
+  var recorderJs = chrome.runtime.getURL("recorder.min.js");
+  $('<script type="text/javascript" href="' + recorderJs + '" ></script>').appendTo("head");
+
   // $.get("tray.html", function(data){
   // });
 
-  var data = '<div id="meetheon" class="tray"><div id="move" class="icon-tray img-container"><div data-toggle="tooltip" data-placement="right" title="Drag"><img src="' +
-    dragIconUrl + '" alt="Drag Me" class="img"></div></div><div id="hidecc" class="icon-tray img-container"><div data-toggle="tooltip" data-placement="right" title="Hide Captions"><img src="' +
-    newspaperIconUrl + '" alt="Hide Captions" class="img"></div></div><div id="exportcc" class="icon-tray img-container"><div data-toggle="tooltip" data-placement="right" title="Export Transcription"><img src="' +
-    downloadIconUrl + '" alt="Export Transcription" class="img"></div></div></div>';
+  var data =
+    "<input type='checkbox' id='click'>" +
+    "<label class='callr-icon' for='click'>" +
+      "<i class='fab fa-solid fa-scroll'></i>" +
+      "<i class='fas fa-times'></i>" +
+    "</label>" +
+    "<div class='wrapper'>" +
+      "<div class='head-text'>Callr</div>" +
+      "<div class='language-screen'>" +
+        "<div class='label-div'>Please Choose a Language</div>" +
+        "<div class='lang-select-div'>" +
+          "<select class='lang-select' aria-label='Default select example'>" +
+            "<option selected>English - IN</option>" +
+            "<option value='1'>English - US</option>" +
+            "<option value='2'>Hindi</option>" +
+            "<option value='3'>Spanish</option>" +
+            "<option value='4'>French</option>" +
+            "<option value='5'>Korean</option>" +
+          "</select>" +
+        "</div>" +
+        "<div class='submit-div'>" +
+          "<button class='btn btn-primary submit-button'>Submit</button>" +
+        "</div>" +
+      "</div>" +
+      "<div class='transcribe-area' style='display: none;'>" +
+        "<div class='tray'>" +
+          "<button class='button play' id='btn-play'>          " +
+            "<i class='iplay fa-solid fa-microphone-lines' id='icon-play' style='display: none;'></i>" +
+            "<i class='iplay fa-solid fa-microphone-lines-slash' id='icon-pause'></i>" +
+          "</button>" +
+          "<button class='button play'>" +
+            "<i class='iplay fa-solid fa-circle-stop'></i>" +
+          "</button>" +
+          "<button class='button play'>" +
+            "<i class='iplay fa-solid fa-up-right-from-square'></i>" +
+          "</button>" +
+          "<button class='button play'>" +
+            "<i class='iplay fa-solid fa-closed-captioning'></i>" +
+          "</button>" +
+          "<button class='button play'>" +
+            "<i class='iplay fa-solid fa-file-lines'></i>" +
+          "</button>" +
+        "</div>" +
+        "<div class='desc-text' id='time-text'>" +
+        "</div>" +
+        "<div class='transcript-area'>" +
+        "</div>" +
+      "</div>" +
+    "</div>";
 
   // $("div").last().after(data);
-  $('body').append(data);
+  $('.T4LgNb').append(data);
