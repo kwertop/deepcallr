@@ -26,7 +26,9 @@ function showTime() {
   
   var time = wd + ", " + mo + " " + d + " " + y + ". " + h + ":" + m + ":" + s + " " + session;
   let node = document.getElementById("time-text");
+  console.log("showTime called first time");
   if(node) {
+    console.log("node found");
     node.innerText = time;
     node.textContent = time;
   
@@ -203,12 +205,13 @@ function setupRealtimeTranscription(socket, recorder) {
 }
 
 $(document).ready(function() {
-  $(".submit-button").click(function() {
-    $(".language-screen").hide();
-    $(".transcribe-area").show();
-  });
-	showTime();
-  showSpeechToText();
+ //  $(".submit-button").click(function() {
+ //    $(".language-screen").hide();
+ //    $(".transcribe-area").show();
+ //  });
+ //  console.log("script function called");
+ // showTime();
+ //  showSpeechToText();
 
 	// $("#btn-play").click(function() {
 		// $("#icon-play").toggle();

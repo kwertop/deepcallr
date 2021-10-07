@@ -26,8 +26,7 @@
   // $.get("tray.html", function(data){
   // });
 
-  var data =
-    "<input type='checkbox' id='click'>" +
+  var data = $("<input type='checkbox' id='click'>" +
     "<label class='callr-icon' for='click'>" +
       "<i class='fab fa-solid fa-scroll'></i>" +
       "<i class='fas fa-times'></i>" +
@@ -74,7 +73,19 @@
         "<div class='transcript-area'>" +
         "</div>" +
       "</div>" +
-    "</div>";
+    "</div>");
 
   // $("div").last().after(data);
-  $('.T4LgNb').append(data);
+$(document).ready(function() {
+  $('body').append(data);
+  // $('.T4LgNb').append(data);
+  // console.log($('.T4LgNb'));
+  console.log("html data inserted");
+  $(".submit-button").click(function() {
+    $(".language-screen").hide();
+    $(".transcribe-area").show();
+  });
+  console.log("script function called");
+  showTime();
+  showSpeechToText();
+});
