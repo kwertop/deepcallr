@@ -26,12 +26,9 @@ function showTime() {
   
   var time = wd + ", " + mo + " " + d + " " + y + ". " + h + ":" + m + ":" + s + " " + session;
   let node = document.getElementById("time-text");
-  console.log("showTime called first time");
   if(node) {
-    console.log("node found");
     node.innerText = time;
     node.textContent = time;
-  
     setTimeout(showTime, 1000);
   }
 }
@@ -41,35 +38,41 @@ function isChrome() {
 }
 
 function showSpeechToText() {
-  if (isChrome()) {
+
+  if (false) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     var listening = false;
     let finalTranscript = "";
     let lastEventTime = null;
     let lastIndex = -1;
-    
+    let lastSpeaker = null;
+
     const stop = () => {
       recognition.stop();
-      // button.textContent = "Start listening";
     };
 
     const start = () => {
       recognition.start();
-      // button.textContent = "Stop listening";
     };
+
+    const onAudioStart = () => {
+      console.log("audio started");
+      speaker = findSpeaker();
+    }
 
     const onResult = event => {
       const now = new Date();
-      if(lastEventTime == null || Math.abs((now - lastEventTime)/1000) >= 5) {
+      if(lastEventTime == null || Math.abs((now - lastEventTime)/1000) >= 5 || lastSpeaker !== speaker) {
         finalTranscript = "";
         let date = new Date();
         let h = date.getHours();
         let m = date.getMinutes();
         let s = date.getSeconds();
-        const pTimeTag = "<p class='time'>" + h + ":" + m + ":" + s + "</p>";
+        const pTimeTag = "<p class='time'>" + h + ":" + m + ":" + s + ",<b>" + speaker + "</b></p>";
         const finalSpan = "<span class='text-dark final'></span>";
         const interimSpan = "<span class='text-secondary interim'></span>";
+        console.log($(".transcript-area"));
         $(".transcript-area").append(pTimeTag);
         $(".transcript-area").append(finalSpan);
         $(".transcript-area").append(interimSpan);
@@ -89,10 +92,12 @@ function showSpeechToText() {
       $("span.final:last").html(finalTranscript);
       $("span.interim:last").html(interimTranscript);
       lastEventTime = now;
+      lastSpeaker = speaker;
     };
 
     recognition.continuous = true;
     recognition.interimResults = true;
+    recognition.onspeechstart = onAudioStart;
     recognition.onresult = onResult;
     $("#btn-play").click( function() {
       $("#icon-play").toggle();
@@ -106,41 +111,45 @@ function showSpeechToText() {
     let socket = null;
     const roomId = "room123";
     const sampleRate = 16000;
+    let recorder = null;
 
-    const recorder = new Recorder({
-      encoderPath: "/encoderWorker.min.js",
-      leaveStreamOpen: true,
-      numberOfChannels: 1,
+    const onError = (err) => {
+      console.log('The following error occured: ' + err);
+    }
 
-      // OPUS options
-      encoderSampleRate: sampleRate,
-      streamPages: true,
-      maxBuffersPerPage: 1,
-    });
-
-    const stop = () => {
-      recorder.stop();
-      socket.close();
-    };
-
-    const start = () => {
-      try {
-        localStream = navigator.mediaDevices.getUserMedia({
-          audio: true
-        });
-      } catch {
-        alert(
-          "No microphone found. Please activate your microphone and refresh the page."
-        );
-        return;
+    const onSuccess = (stream) => {
+      this.audioContext = new this.AudioContext();
+      this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
+      let gain = this.audioContext.createGain();
+      this.mediaStreamSource.connect(gain);
+      document.querySelectorAll("audio")
+      .forEach(e => {
+        let t = e.captureStream();
+        this.audioContext.createMediaStreamSource(t).connect(gain);
+      });
+      let dest = this.audioContext.createMediaStreamDestination();
+      gain.connect(dest);
+      this.mediaStreamSource = this.audioContext.createMediaStreamSource(dest.stream)
+      const options = {
+        audioBitsPerSecond :  64000,
+        mimeType : 'audio/webm;codecs=opus'
       }
-
+      recorder = new MediaRecorder(this.mediaStreamSource.mediaStream, options);
       if(socket == null) {
         socket = io.connect("http://localhost:3000");
         setupRealtimeTranscription(socket, recorder);
       }
 
       socket.emit("join", roomId);
+    }
+
+    const stop = () => {
+      // recorder.stop();
+      // socket.close();
+    };
+
+    const start = async () => {
+      let stream = await navigator.mediaDevices.getUserMedia({ audio: true }).then(onSuccess, onError);
     };
 
     var listening = false;
@@ -154,18 +163,41 @@ function showSpeechToText() {
 }
 
 function setupRealtimeTranscription(socket, recorder) {
+  var speaker = null;
+  const findSpeaker = (mutationList, observer) => {
+    mutationList.forEach( function(mutation) {
+      if (mutation.type === 'attributes') {
+        let target = mutation.target;
+        if(target.attributes.jscontroller && target.attributes.jscontroller.nodeValue === 'ES310d') {
+          console.log(target);
+          let containerNode = target.parentNode.parentNode.parentNode;
+          let element = containerNode.querySelector('[data-self-name="You"]');
+          speaker = element.innerHTML;
+        }
+      }
+    });
+  }
+
+  const elem = document.querySelector('body');
+  var config = { attributes: true, childList: true, subtree: true };
+  var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+  const observer = new MutationObserver(findSpeaker);
+  observer.observe(elem, config);
+
   let finalTranscript = "";
   let lastEventTime = null;
   let interimTranscript = "";
+  let lastSpeaker = null;
 
   socket.on("can-open-mic", () => {
     console.log("can open mic");
-    recorder.start();
+    recorder.start(1000);
   });
 
   /** We forward our audio stream to the server. */
   recorder.ondataavailable = (e) => {
-    socket.emit("microphone-stream", e.buffer);
+    console.log("data available");
+    socket.emit("microphone-stream", e.data);
   };
 
   socket.on("transcript-result", (socketId, data) => {
@@ -176,13 +208,13 @@ function setupRealtimeTranscription(socket, recorder) {
       return;
     }
     const now = new Date();
-    if(lastEventTime == null || Math.abs((now - lastEventTime)/1000) >= 5) {
+    if(parsedData.is_final && (lastEventTime == null || Math.abs((now - lastEventTime)/1000) >= 5 || lastSpeaker !== speaker)) {
       finalTranscript = "";
       let date = new Date();
       let h = date.getHours();
       let m = date.getMinutes();
       let s = date.getSeconds();
-      const pTimeTag = "<p class='time'>" + h + ":" + m + ":" + s + "</p>";
+      const pTimeTag = "<p class='time'>" + h + ":" + m + ":" + s + ",<b>" + speaker + "</b></p>";
       const finalSpan = "<span class='text-dark final'></span>";
       const interimSpan = "<span class='text-secondary interim'></span>";
       $(".transcript-area").append(pTimeTag);
@@ -201,6 +233,7 @@ function setupRealtimeTranscription(socket, recorder) {
     $("span.final:last").html(finalTranscript);
     $("span.interim:last").html(interimTranscript);
     lastEventTime = now;
+    lastSpeaker = speaker;
   });
 }
 

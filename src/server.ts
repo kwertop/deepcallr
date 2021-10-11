@@ -28,7 +28,12 @@ let server = http.createServer(app);
 const MAX_CLIENTS = 1;
 
 const SocketIoServer = require("socket.io").Server;
-const io = new SocketIoServer(server);
+const io = new SocketIoServer(server, {
+  cors: {
+    origin: "*",
+    methods: "*"
+  }
+});
 io.sockets.on("connection", handle_connection);
 
 function handle_connection(socket: Socket) {

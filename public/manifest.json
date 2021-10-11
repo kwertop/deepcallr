@@ -11,8 +11,14 @@
   "content_scripts": [
   	{
   		"matches": ["https://meet.google.com/*"],
-      "js": ["jquery-3.6.0.min.js", "jquery-ui.min.js", "script.js", "contentScript.js"],
-      "css": ["style.css", "jquery-ui.min.css", "bootstrap.min.css"]
+      "js": [
+        "jquery-3.6.0.min.js",
+        "jquery-ui.min.js",
+        "script.js",
+        "socket.io.min.js",
+        "contentScript.js"
+      ],
+      "css": ["style.css", "all.min.css", "solid.min.css", "jquery-ui.min.css", "bootstrap.min.css"]
   	}
   ],
   "background": {
@@ -21,7 +27,16 @@
   "icons": {},
   "web_accessible_resources": [
     {
-      "resources": ["style.css", "jquery-ui.min.css", "bootstrap.min.css"],
+      "resources": [
+        "style.css",
+        "scroll.svg",
+        "all.min.css",
+        "solid.min.css",
+        "jquery-ui.min.css",
+        "bootstrap.min.css",
+        "webfonts/*.ttf",
+        "webfonts/*.woff2"
+      ],
       "matches": [ "https://meet.google.com/*" ]
     }
   ]

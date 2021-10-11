@@ -5,6 +5,12 @@
   var meetcss = chrome.runtime.getURL("style.css");
   $('<link rel="stylesheet" type="text/css" href="' + meetcss + '" >').appendTo("head");
 
+  var faAll = chrome.runtime.getURL("all.min.css");
+  $('<link rel="stylesheet" type="text/css" href="' + faAll + '" >').appendTo("head");
+
+  var faSolid = chrome.runtime.getURL("solid.min.css");
+  $('<link rel="stylesheet" type="text/css" href="' + faSolid + '" >').appendTo("head");
+
   var bootstrapMinCss = chrome.runtime.getURL("bootstrap.min.css");
   $('<link rel="stylesheet" type="text/css" href="' + bootstrapMinCss + '" >').appendTo("head");
 
@@ -20,8 +26,8 @@
   var myscriptJs = chrome.runtime.getURL("script.js");
   $('<script type="text/javascript" href="' + myscriptJs + '" ></script>').appendTo("head");
 
-  var recorderJs = chrome.runtime.getURL("recorder.min.js");
-  $('<script type="text/javascript" href="' + recorderJs + '" ></script>').appendTo("head");
+  var socketJs = chrome.runtime.getURL("socket.io.min.js");
+  $('<script type="text/javascript" href="' + socketJs + '" crossorigin="anonymous"></script>').appendTo("head");
 
   // $.get("tray.html", function(data){
   // });
@@ -84,8 +90,7 @@ $(document).ready(function() {
   $(".submit-button").click(function() {
     $(".language-screen").hide();
     $(".transcribe-area").show();
-  });
-  console.log("script function called");
+  });  
   showTime();
   showSpeechToText();
 });
