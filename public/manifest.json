@@ -8,6 +8,9 @@
     "downloads",
     "tabs"
   ],
+  "action": {
+    "default_popup": "popup.html"
+  },
   "content_scripts": [
   	{
   		"matches": ["https://meet.google.com/*"],
@@ -16,7 +19,8 @@
         "jquery-ui.min.js",
         "script.js",
         "socket.io.min.js",
-        "contentScript.js"
+        "contentScript.js",
+        "popup.js"
       ],
       "css": ["style.css", "all.min.css", "solid.min.css", "jquery-ui.min.css", "bootstrap.min.css"]
   	}
@@ -28,6 +32,7 @@
   "web_accessible_resources": [
     {
       "resources": [
+        "tray.html",
         "style.css",
         "scroll.svg",
         "all.min.css",

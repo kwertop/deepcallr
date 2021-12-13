@@ -1,0 +1,122 @@
+<script src="popup.js">
+</script>
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+    @font-face {
+        font-family: 'Poppins' sans-serif;
+        font-weight: 400;
+    }
+    html {
+        height: 0;
+        width: 320px;
+    }
+    body {
+        margin: 0;
+    }
+    a[class="conference"]::after {
+      content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+      margin: 0px 3px 0px 5px;
+    }
+    .popup-content {
+        color: #052e54;
+        font-family: Poppins, sans-serif;
+        padding: 10px;
+    }
+    .extension-title {
+        display: flex;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0.5em 0;
+    }
+    .headline-1 {
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0.5em 0;
+        text-align: center;
+    }
+    .headline-2 {
+        margin: 0.5em 0;
+        font-size: 16px;
+        text-align: center;
+    }
+    .headline-3 {
+        margin: 0.3em 0;
+        font-size: 12px;
+        text-align: center;
+    }
+    .headline-4 {
+        margin: 0.3em 0;
+        font-size: 14px;
+        text-align: center;
+    }
+    .features-row {
+        margin: 1em 0;
+        text-align: center;
+    }
+    .features {
+        margin: 0;
+        text-align: left;
+        display: inline-block;
+        font-size: 14px;
+        padding-left: 1.5em;
+        list-style-image: url(chrome-extension://bnmojkbbkkonlmlfgejehefjldooiedp/assets/img/svg-icons/selected.svg);
+    }
+    .cta-row {
+        margin: 1em 0;
+        font-size: 16px;
+        text-align: center;
+    }
+    .cta {
+        display: inline-block;
+        text-align: center;
+        font-weight: 400;
+        line-height: 44px;
+        letter-spacing: -0.09px;
+        border-radius: 4px;
+        background: #126fd6;
+        color: white;
+        padding: 0 20px 0 18px;
+        text-decoration: none;
+    }
+</style>
+<div class="popup-content">
+    <div class="extension-title">
+        <img alt="Callr.ai" src="chrome-extension://bnmojkbbkkonlmlfgejehefjldooiedp/assets/img/svg-icons/otter-logo.svg" /> &nbsp; for Your Meetings
+    </div>
+    <div class="headline-1">Full Meeting Transcription</div>
+    <div class="headline-2">Capture conversations to remember</div>
+    <div class="features-row">
+        <ul class="features">
+            <li>Audio transcript</li>
+            <li>Closed captions</li>
+            <li>Summary of the conversation</li>
+        </ul>
+    </div>
+    <div class="cta-row" id="popup-login-container">
+        <a class="cta" target="_blank" href="https://meet.google.com/">
+            Sign Up for Free
+        </a>
+        <div class="headline-3">Already have an account? <a target="_blank" href="https://meet.google.com/">Sign In</a></div>
+    </div>
+    <div class="cta-row" id="recorder-div">
+        <a class="cta">
+            Start Recording
+        </a>
+    </div>
+    <div class="headline-4" id="app-names-row">
+        <a target="_blank" href="https://meet.google.com/" class="conference">
+            Meet
+        </a>
+
+        <a target="_blank" href="https://zoom.us/" class="conference">
+            Zoom
+        </a>
+        <a target="_blank" href="https://teams.microsoft.com/" class="conference">
+            Teams
+        </a>
+        <a target="_blank" href="https://webex.com/" class="conference">
+            Webex
+        </a>
+    </div>
+</div>

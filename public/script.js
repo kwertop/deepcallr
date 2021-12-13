@@ -1,3 +1,47 @@
+let selectedLang = "en-us";
+
+function initHooks() {
+  $(".submit-button").click(function() {
+    selectedLang = document.getElementById('lang-select-opt').value;
+    $(".language-screen").hide();
+    $(".transcribe-area").show();
+  });
+  $("#hide-scribe").click(function() {
+    if($("#conversation-block").hasClass("transcript-area-hidden")) {
+      $("#conversation-block").addClass("transcript-area");
+      $("#conversation-block").removeClass("transcript-area-hidden");
+      $(".wrapper").removeClass("wrapper-height-cc-hidden");
+      $(".wrapper").addClass("wrapper-height-cc-visible");
+    }
+    else {
+      $("#conversation-block").addClass("transcript-area-hidden");
+      $("#conversation-block").removeClass("transcript-area");
+      $(".wrapper").removeClass("wrapper-height-cc-visible");
+      $(".wrapper").addClass("wrapper-height-cc-hidden");
+    }
+  });
+
+  $(".wrapper").draggable({ containment: 'window', scroll: false });
+  $(".wrapper").draggable("disable");
+
+  $(".fag").mousedown(function() {
+    console.log("mouse is down");
+    $(".wrapper").draggable("enable");
+  });
+
+  $(".fag").mouseout(function() {
+    console.log("mouse is up");
+    $(".wrapper").draggable("disable");
+  });
+
+  $(".fax").click(function() {
+    $(".wrapper").remove();
+  });
+
+  showTime();
+  showSpeechToText(selectedLang);
+}
+
 function showTime() {
   var monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec" ];
   var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -37,7 +81,7 @@ function isChrome() {
   return !!window.chrome && !!window.chrome.app && !navigator.brave;
 }
 
-function showSpeechToText() {
+function showSpeechToText(lang) {
 
   if (false) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -136,7 +180,8 @@ function showSpeechToText() {
       }
       recorder = new MediaRecorder(this.mediaStreamSource.mediaStream, options);
       if(socket == null) {
-        socket = io.connect("http://localhost:3000");
+        const accessToken = window.localStorage.getItem("accessToken");
+        socket = io.connect(`http://localhost:3000?token=${accessToken}&lang=${lang}`);
         setupRealtimeTranscription(socket, recorder);
       }
 
@@ -164,17 +209,29 @@ function showSpeechToText() {
 
 function setupRealtimeTranscription(socket, recorder) {
   var speaker = null;
+  var appName = getClientName();
   const findSpeaker = (mutationList, observer) => {
     mutationList.forEach( function(mutation) {
       if (mutation.type === 'attributes') {
         let target = mutation.target;
-        if(target.attributes.jscontroller && target.attributes.jscontroller.nodeValue === 'ES310d') {
-          console.log(target);
-          let containerNode = target.parentNode.parentNode.parentNode;
-          let element = containerNode.querySelector('[data-self-name="You"]');
-          speaker = element.innerHTML;
+        if(appName === 'meet') {
+          if(target.attributes.jscontroller && target.attributes.jscontroller.nodeValue === 'ES310d') {
+            console.log(target);
+            let containerNode = target.parentNode.parentNode.parentNode;
+            let element = containerNode.querySelector('[data-self-name="You"]');
+            speaker = element.innerHTML;
+          }
+        }
+        else if(appName === 'zoom') {
+          if(target.attributes.class && target.attributes.class.nodeValue === 'participants-icon__participants-mute-animation') {
+            console.log(target);
+            let containerNode = target.parentNode.parentNode.parentNode;
+            let element = containerNode.querySelector('[class="participants-item__display-name"]');
+            speaker = element.innerHTML;
+          }
         }
       }
+      console.log(mutation);
     });
   }
 
@@ -188,6 +245,7 @@ function setupRealtimeTranscription(socket, recorder) {
   let lastEventTime = null;
   let interimTranscript = "";
   let lastSpeaker = null;
+  let timeStr = "";
 
   socket.on("can-open-mic", () => {
     console.log("can open mic");
@@ -209,12 +267,20 @@ function setupRealtimeTranscription(socket, recorder) {
     }
     const now = new Date();
     if(parsedData.is_final && (lastEventTime == null || Math.abs((now - lastEventTime)/1000) >= 5 || lastSpeaker !== speaker)) {
+      if(finalTranscript !== "") {
+        const newSpeaker = {
+          "speaker": speaker,
+          "time": timeStr
+        }
+      }
+      socket.emit("new-speaker", JSON.stringify(newSpeaker));
       finalTranscript = "";
       let date = new Date();
       let h = date.getHours();
       let m = date.getMinutes();
       let s = date.getSeconds();
-      const pTimeTag = "<p class='time'>" + h + ":" + m + ":" + s + ",<b>" + speaker + "</b></p>";
+      timeStr = h + ":" + m + ":" + s;
+      const pTimeTag = "<p class='time'>" + timeStr + ",<b>" + speaker + "</b></p>";
       const finalSpan = "<span class='text-dark final'></span>";
       const interimSpan = "<span class='text-secondary interim'></span>";
       $(".transcript-area").append(pTimeTag);
@@ -237,39 +303,24 @@ function setupRealtimeTranscription(socket, recorder) {
   });
 }
 
+function isLoggedIn() {
+  return !!window.localStorage.getItem('accessToken');
+}
+
+function getClientName() {
+  if(window.location.origin.includes('meet.google.com')) {
+    return 'meet';
+  }
+  else if(window.location.origin.includes('teams.microsoft')) {
+    return 'teams';
+  }
+  else if(window.location.origin.includes('webex')) {
+    return 'webex';
+  }
+  else if(window.location.origin.includes('zoom')) {
+    return 'zoom';
+  }
+}
+
 $(document).ready(function() {
- //  $(".submit-button").click(function() {
- //    $(".language-screen").hide();
- //    $(".transcribe-area").show();
- //  });
- //  console.log("script function called");
- // showTime();
- //  showSpeechToText();
-
-	// $("#btn-play").click(function() {
-		// $("#icon-play").toggle();
-		// $("#icon-pause").toggle();
-
-		// if($("#icon-pause").is(':visible')) {
-		// 	if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-		// 		console.log('getUserMedia supported.');
-		// 		navigator.mediaDevices.getUserMedia (
-		// 		// constraints - only audio needed for this app
-		// 		{
-		// 			audio: true
-		// 		})
-		// 		// Success callback
-		// 		.then(function(stream) {
-		// 			console.log("audio heard");
-		// 		})
-
-		// 		// Error callback
-		// 		.catch(function(err) {
-		// 	   console.log('The following getUserMedia error occurred: ' + err);
-		// 		});
-		// 	} else {
-		// 		console.log('getUserMedia not supported on your browser!');
-		// 	}
-		// }
-	// });
 });

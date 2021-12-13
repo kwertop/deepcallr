@@ -6,8 +6,14 @@ import { LiveTranscriptionOptions } from "@deepgram/sdk/dist/types";
 import { Socket } from "socket.io";
 import { Room } from "socket.io-adapter";
 import cors from 'cors';
+import DBConnection from "./dbConnection";
+import { UserAccount } from "./entity/UserAccount";
+import { Subscription } from "./entity/Subscription";
+import { Plan } from "./entity/Plan";
+import { getRepository, Repository } from "typeorm";
 
 const deepGramKey = process.env.DG_KEY || "5ef9c14df93cf250e88f7418e37ec301cfb90cf4";
+const fs = require('fs');
 
 if (deepGramKey === "") {
   throw "You must define deepGramKey in your .env file";
@@ -34,6 +40,45 @@ const io = new SocketIoServer(server, {
     methods: "*"
   }
 });
+
+const user: UserAccount = null;
+const minutesCounter: NodeJS.Timer = null;
+const userRepo: Repository<UserAccount> = getRepository(UserAccount);
+const subscriptionRepo: Repository<Subscription> = getRepository(Subscription);
+const planRepo: Repository<Plan> = getRepository(Plan);
+let activeSubscription: Subscription = null;
+let minutesUsedTillNow: number = 0;
+let minutesPerMonth: number = 0;
+
+io.use((socket, next) => {
+  if(socket.handshake.query && socket.handshake.query.token) {
+    user = await userRepo.findOne({ token: token });
+    if(user) {
+      activeSubscription = await subscriptionRepo.findOne({ userId: user.id, status: 1 });
+      if(activeSubscription) {
+        minutesUsedTillNow = activeSubscription.minutesUsed;
+        const plan: Plan = await planRepo.findOne({ id: activeSubscription.plan_id });
+        minutesPerMonth = plan.minutesPerMonth;
+        if(activeSubscription.minutesUsed < minutesPerMonth) {
+          next();
+        }
+        else {
+          next(new Error('Monthly Minutes Exhausted. Please renew subscription.'));    
+        }
+      }
+      else {
+        next(new Error('No Active Subscription found for this user.'));  
+      }
+    }
+    else {
+      next(new Error('Authentication error'));
+    }
+  }
+  else {
+    next(new Error('Authentication error'));
+  }
+});
+
 io.sockets.on("connection", handle_connection);
 
 function handle_connection(socket: Socket) {
@@ -54,16 +99,48 @@ function handle_connection(socket: Socket) {
       socket.join(room);
 
       console.log("room joined");
-      setupRealtimeTranscription(socket, room);
+
+      minutesCounter = setInterval( () => {
+        await subscriptionRepo.createQueryBuilder()
+          .update()
+          .set({
+            minutesUsed: () => "minutesUsed + 1"
+          })
+          .where("id = :id", { id: activeSubscription.id })
+          .execute();
+        minutesUsedTillNow += 1;
+        if(minutesUsedTillNow >= minutesPerMonth) {
+          socket.emit("monthly-limit-reached");
+          socket.disconnect(0);
+        }
+      }, 60000);
+
+      const lang: string = String(socket.handshake.query.lang);
+      setupRealtimeTranscription(socket, room, lang);
 
       socket.on("disconnect", () => {
         socket.broadcast.to(room).emit("bye", socket.id);
+        clearInterval(minutesCounter);
+        minutesCounter = undefined;
       });
+
+      socket.on("complete-dialogue", (data) => {
+        const dialogue = JSON.parse(data);
+        const newLine = data["time"] + ", " + data["speaker"] + ": " + data["transcript"] + "\r\n";
+        fs.appendFile('~/Documents/meeting.txt', newLine, (err) => {
+          if(err) {
+            //
+          }
+          else {
+            //
+          }
+        });
+      })
     }
   });
 }
 
-function setupRealtimeTranscription(socket: Socket, room: Room) {
+function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
   /** The sampleRate must match what the client uses. */
   const sampleRate = 16000;
 
@@ -71,7 +148,7 @@ function setupRealtimeTranscription(socket: Socket, room: Room) {
   const transcriptionOptions: LiveTranscriptionOptions = {
   	version: "latest",
   	punctuate: true,
-    language: "hi"
+    language: lang
   };
 
   const dgSocket = deepgram.transcription.live(transcriptionOptions);
@@ -112,6 +189,18 @@ function setupRealtimeTranscription(socket: Socket, room: Room) {
   });
 }
 const port = process.env.PORT || 3000;
-const listener = server.listen(port, () =>
-  console.log(`Server is running on port ${port}`)
-);
+
+async function startServer() {
+  try {
+    await DBConnection.getDBConnection();
+
+    server.listen(port, () =>
+      console.log(`Server is running on port ${port}`)
+    );
+  } catch (err) {
+    console.log("start server: ", err);
+    return;
+  }
+}
+
+startServer();

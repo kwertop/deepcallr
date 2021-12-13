@@ -40,6 +40,21 @@ label.callr-icon i.fas{
   pointer-events: none;
   z-index: 999;
 }
+i.fag {
+  margin-left: 30%;
+}
+i.fax:hover {
+  cursor: pointer;
+}
+i.fag:hover {
+  cursor: move;
+}
+i.fag:active {
+  cursor: grabbing;
+}
+#draggable-div {
+  height: 100%;
+}
 #click:checked ~ label i.fas{
   opacity: 1;
   pointer-events: auto;
@@ -55,15 +70,24 @@ label.callr-icon i.fas{
 .wrapper{
   position: absolute;
   right: 30px;
-  bottom: 0px;
+  bottom: 10px;
   max-width: 360px;
+  min-width: 360px;
   background: #fff;
   border-radius: 15px;
   box-shadow: 0px 15px 20px rgba(0,0,0,0.1);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);
+  opacity: 1;
+  pointer-events: auto;
+  transition: all 1s cubic-bezier(0.68,-0.55,0.265,1.55);
   z-index: 999;
+}
+.wrapper-height-cc-visible {
+  max-height: 560px;
+  min-height: 560px;
+}
+.wrapper-height-cc-hidden {
+  max-height: 150px;
+  min-height: 150px;
 }
 #click:checked ~ .wrapper{
   opacity: 1;
@@ -78,6 +102,7 @@ label.callr-icon i.fas{
   padding: 0 20px;
   font-weight: 500;
   font-size: 30px;
+  position: relative;
   background: -webkit-linear-gradient(left, #120af5, #05c3f7);
   z-index: 999;
 }
@@ -97,12 +122,15 @@ label.callr-icon i.fas{
 }
 .wrapper .tray {
   width: 100%;
-  padding: 2px 5px;
+  padding: 2px 4px;
   margin: 2px 0;
   height: 56px;
   border-radius: 0px;
   border-bottom: 2px solid lightgrey;
   transition: all 0.3s ease;
+  align-items: center;
+  align-content: center;
+  vertical-align: !important;
 }
 div button.play {
   position: relative;
@@ -118,13 +146,25 @@ div button.play {
   cursor: pointer;
   z-index: 999;
 }
+div button:active{
+  transform: scale(0.97);
+}
 .wrapper .transcript-area {
   overflow-y: auto;
-  width: 360px;
+  width: 338px;
   height: 400px;
   padding-left: 5px;
   padding-right: 5px;
+  display: 'block';
+  transition: 1s;
+  -webkit-transition: 1s;
 }
+.transcript-area-hidden {
+  display: 'none';
+  height: 0px;
+  transition: 1s;
+  -webkit-transition: 1s;
+} 
 .chat-box form{
   padding: 5px 15px;
   margin: 0px 0;
@@ -185,11 +225,8 @@ form .textarea textarea:focus::placeholder{
   background: -webkit-linear-gradient(left, #120af5, #05c3f7);
   transition: all 0.3s ease;
 }
-.chat-box form .field button:active{
-  transform: scale(0.97);
-}
 .transcribe-area {
-  position: relative;
+  /*position: relative;*/
 }
 .language-screen {
   width: 360px;
