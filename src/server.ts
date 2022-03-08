@@ -11,9 +11,11 @@ import { UserAccount } from "./entity/UserAccount";
 import { Subscription } from "./entity/Subscription";
 import { Plan } from "./entity/Plan";
 import { getRepository, Repository } from "typeorm";
+import MeetingRoom from "./rooms/MeetingRoom";
 
 const deepGramKey = process.env.DG_KEY || "5ef9c14df93cf250e88f7418e37ec301cfb90cf4";
 const fs = require('fs');
+const Sanscript = require('@sanskrit-coders/sanscript');
 
 if (deepGramKey === "") {
   throw "You must define deepGramKey in your .env file";
@@ -21,7 +23,7 @@ if (deepGramKey === "") {
 
 const app = express();
 
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 app.use(cors<express.Request>({
   origin: ["*", "null"],
@@ -41,25 +43,26 @@ const io = new SocketIoServer(server, {
   }
 });
 
-const user: UserAccount = null;
-const minutesCounter: NodeJS.Timer = null;
-const userRepo: Repository<UserAccount> = getRepository(UserAccount);
-const subscriptionRepo: Repository<Subscription> = getRepository(Subscription);
-const planRepo: Repository<Plan> = getRepository(Plan);
-let activeSubscription: Subscription = null;
-let minutesUsedTillNow: number = 0;
-let minutesPerMonth: number = 0;
+let userRepo: Repository<UserAccount>;
+let subscriptionRepo: Repository<Subscription>;
+let planRepo: Repository<Plan>;
 
-io.use((socket, next) => {
+let audioFileName: string;
+let transciptionFileName: string;
+let captionsFileName: string;
+
+io.use(async (socket: any, next: any) => {
   if(socket.handshake.query && socket.handshake.query.token) {
-    user = await userRepo.findOne({ token: token });
+    let user: UserAccount = await userRepo.findOne({ token: socket.handshake.query.token });
     if(user) {
-      activeSubscription = await subscriptionRepo.findOne({ userId: user.id, status: 1 });
+      let activeSubscription: Subscription = await subscriptionRepo.findOne({ userId: user.id, status: 1 });
       if(activeSubscription) {
-        minutesUsedTillNow = activeSubscription.minutesUsed;
-        const plan: Plan = await planRepo.findOne({ id: activeSubscription.plan_id });
-        minutesPerMonth = plan.minutesPerMonth;
+        const plan: Plan = await planRepo.findOne({ id: activeSubscription.planId });
+        let minutesPerMonth: number = plan.minutesPerMonth;
         if(activeSubscription.minutesUsed < minutesPerMonth) {
+          let meetingRoom: MeetingRoom = new MeetingRoom(user, activeSubscription, minutesPerMonth);
+          meetingRoom.initMeetingNote(socket.handshake.query.meetingApp, socket.handshake.query.meetingCode);
+          socket.data = meetingRoom;
           next();
         }
         else {
@@ -83,6 +86,7 @@ io.sockets.on("connection", handle_connection);
 
 function handle_connection(socket: Socket) {
   const rooms = io.of("/").adapter.rooms;
+  const meetingRoom: MeetingRoom = socket.data;
 
   socket.on("join", (room: Room) => {
 
@@ -95,55 +99,47 @@ function handle_connection(socket: Socket) {
     if (clientsCount >= MAX_CLIENTS) {
       console.log("room full");
       socket.emit("full", room);
-    } else {
+    }
+    else {
       socket.join(room);
 
       console.log("room joined");
 
-      minutesCounter = setInterval( () => {
-        await subscriptionRepo.createQueryBuilder()
-          .update()
-          .set({
-            minutesUsed: () => "minutesUsed + 1"
-          })
-          .where("id = :id", { id: activeSubscription.id })
-          .execute();
-        minutesUsedTillNow += 1;
-        if(minutesUsedTillNow >= minutesPerMonth) {
-          socket.emit("monthly-limit-reached");
-          socket.disconnect(0);
-        }
-      }, 60000);
+      meetingRoom.startMinutesTimer(socket);
 
       const lang: string = String(socket.handshake.query.lang);
       setupRealtimeTranscription(socket, room, lang);
 
-      socket.on("disconnect", () => {
-        socket.broadcast.to(room).emit("bye", socket.id);
-        clearInterval(minutesCounter);
-        minutesCounter = undefined;
-      });
-
       socket.on("complete-dialogue", (data) => {
         const dialogue = JSON.parse(data);
-        const newLine = data["time"] + ", " + data["speaker"] + ": " + data["transcript"] + "\r\n";
-        fs.appendFile('~/Documents/meeting.txt', newLine, (err) => {
-          if(err) {
-            //
-          }
-          else {
-            //
-          }
-        });
+        const newLine = dialogue["time"] + ", " + dialogue["speaker"] + ": " + dialogue["transcript"] + "\r\n";
+        meetingRoom.appendDialog(newLine);
+      });
+
+      socket.on("incomplete-dialogue", (data) => {
+        const dialogue = JSON.parse(data);
+        const newLine = dialogue["time"] + ", " + dialogue["speaker"] + ": " + dialogue["transcript"] + "\r\n";
+        meetingRoom.appendDialog(newLine);
       })
     }
   });
 }
 
+const saveAudioToDisk = (audioBlob: any) => {
+  fs.writeFile(audioFileName, audioBlob, (err) => {console.log("error while writing audio: ", err);})
+}
+
 function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
   /** The sampleRate must match what the client uses. */
   const sampleRate = 16000;
+  let dialogue: string = "";
+  let speaker: string = "";
+  let dialogueTime: string = "";
+  let captions: Array<any> = [];
+  let audioChunks: Array<any> = [];
+  const meetingRoom: MeetingRoom = socket.data;
 
+  console.log("language Selected: ", lang);
   const deepgram = new Deepgram(deepGramKey);
   const transcriptionOptions: LiveTranscriptionOptions = {
   	version: "latest",
@@ -168,6 +164,7 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
    */
   socket.on("microphone-stream", (stream) => {
     console.log("here");
+    audioChunks.push(stream);
     if (dgSocket.getReadyState() === WebSocket.OPEN) {
       dgSocket.send(stream);
     }
@@ -178,7 +175,24 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
    */
   dgSocket.addListener("transcriptReceived", (transcription) => {
     console.log("transcriptReceived");
-    io.to(room).emit("transcript-result", socket.id, transcription);
+    let parsedData = JSON.parse(transcription);
+    if(lang === 'hi') {
+      parsedData["channel"]["alternatives"][0]["transcript"] = Sanscript.t(parsedData["channel"]["alternatives"][0]["transcript"],
+        'devanagari', 'hk');
+    }
+    let alternatives = parsedData["channel"]["alternatives"][0];
+    if(alternatives["words"].length > 0 && alternatives["confidence"] > 0.4) {
+      io.to(room).emit("transcript-result", socket.id, transcription);
+      if(parsedData.is_final) {
+        let caption = {
+          "start": Math.floor(parsedData.start),
+          "duration": parsedData.duration,
+          "end": Math.floor(parsedData.start + parsedData.duration),
+          "words": alternatives["transcript"]
+        }
+        captions.push(caption);
+      }
+    }
   });
 
   /** We close the dsSocket when the client disconnects. */
@@ -186,13 +200,24 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
     if (dgSocket.getReadyState() === WebSocket.OPEN) {
       dgSocket.finish();
     }
+    meetingRoom.saveAudioToDisk(audioChunks);
+    meetingRoom.saveCaptionsToDisk(captions);
+    meetingRoom.uploadFilesToS3();
+    meetingRoom.indexToElastic();
+    socket.broadcast.to(room).emit("bye", socket.id);
+    meetingRoom.unsetTimer();
   });
 }
-const port = process.env.PORT || 3000;
+
+const port = process.env.PORT || 3200;
 
 async function startServer() {
   try {
     await DBConnection.getDBConnection();
+
+    userRepo = getRepository(UserAccount);
+    subscriptionRepo = getRepository(Subscription);
+    planRepo = getRepository(Plan);
 
     server.listen(port, () =>
       console.log(`Server is running on port ${port}`)

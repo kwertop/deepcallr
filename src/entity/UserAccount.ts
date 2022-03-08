@@ -8,12 +8,8 @@ import {
   BeforeUpdate,
   Check
 } from "typeorm";
-import { BCRYPT_SALT_ROUNDS } from "../config";
-
-const bcrypt = require('bcrypt');
 
 @Entity()
-@Check(`"email" <> ''`)
 export class UserAccount {
 
   @PrimaryGeneratedColumn()
@@ -24,6 +20,9 @@ export class UserAccount {
 
   @Column({ nullable: false })
   name: string;
+
+  @Column({ nullable: false, default: "" })
+  userId: string;
 
   @Column({ nullable: false, default: "" })
   profilePic: string;
@@ -39,12 +38,4 @@ export class UserAccount {
 
   @UpdateDateColumn({type: "timestamp"})
   updatedAt: Date;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  hashPassword() {
-    if(this.password) {
-      this.password = bcrypt.hashSync(this.password, BCRYPT_SALT_ROUNDS);
-    }
-  }
 }

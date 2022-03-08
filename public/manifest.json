@@ -6,14 +6,22 @@
   "permissions": [
     "storage",
     "downloads",
-    "tabs"
+    "tabs",
+    "tabCapture",
+    "activeTab",
+    "desktopCapture",
+    "scripting",
+    "cookies"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/"
   ],
   "action": {
     "default_popup": "popup.html"
   },
   "content_scripts": [
   	{
-  		"matches": ["https://meet.google.com/*"],
+  		"matches": ["https://meet.google.com/*", "https://zoom.us/*"],
       "js": [
         "jquery-3.6.0.min.js",
         "jquery-ui.min.js",
@@ -40,9 +48,11 @@
         "jquery-ui.min.css",
         "bootstrap.min.css",
         "webfonts/*.ttf",
-        "webfonts/*.woff2"
+        "webfonts/*.woff2",
+        "frame.html",
+        "popup.html"
       ],
-      "matches": [ "https://meet.google.com/*" ]
+      "matches": [ "https://meet.google.com/*", "https://zoom.us/*" ]
     }
   ]
 }

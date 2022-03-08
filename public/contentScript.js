@@ -57,6 +57,14 @@ const loadTray = () => {
   }
 }
 
+const injectIframe = () => {
+  var frame = document.createElement('iframe');
+  frame.src = chrome.runtime.getURL('frame.html');
+  frame.style.position = 'absolute';
+  frame.style.left = '-5000px';
+  document.body.appendChild(frame);
+}
+
 if (location.origin === "https://callr.ai") {
   if (location.pathname === '/') {
     chrome.runtime.sendMessage({
@@ -84,9 +92,20 @@ if (location.origin === "https://callr.ai") {
   // Autoopen when user is viewing a Google Meet meeting.
   console.log("meeting application is running");
 
-  if (isMeetingLive) {
-    loadTray();
+  if(location.host.includes("meet.google.com")) {
+    if (isMeetingLive) {
+      loadTray();
+    }
   }
+
+  chrome.runtime.sendMessage({
+    action: 'openPopup',
+    popup: ''
+  });
+
+  // if(location.host.includes('zoom.us')) {
+  //   injectIframe();
+  // }
   // By default, we set browser action is set both to trigger the popup(set in
   // manifest.json) and to send the 'load' message to the tab (set in
   // background.ts).
@@ -96,10 +115,7 @@ if (location.origin === "https://callr.ai") {
   //
   // On Google Meet pages, we want the browser action to trigger the 'load'
   // message and not the popup. We do that by removing the popup:
-  chrome.runtime.sendMessage({
-    action: 'openPopup',
-    popup: ''
-  });
+  
   // In background.ts, upon receiving this message, we remove the popup for
   // the current tab. It appears that we don't need to set the popup again if
   // the user navigates to a non-Google Meet page later in the same tab,

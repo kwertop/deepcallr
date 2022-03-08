@@ -2,46 +2,58 @@
   <div class='head-text'>
     Callr
     <i class="fa-solid fa-grip fag"></i>
-    <div style="float:right">
+    <div class="cross-btn">
       <i class="fa-solid fa-xmark fax"></i>
     </div>
   </div>
-  <div class='language-screen'>
+  <div class='language-screen' style='display: none;'>
     <div class='label-div'>Please Choose a Language</div>
     <div class='lang-select-div'>
       <select id='lang-select-opt' class='lang-select' aria-label='Default select example'>
-        <option selected>English - IN</option>
-        <option value='1'>English - US</option>
-        <option value='2'>Hindi</option>
-        <option value='3'>Spanish</option>
-        <option value='4'>French</option>
-        <option value='5'>Korean</option>
+        <option selected value='en-IN'>English - IN</option>
+        <option value='en-US'>English - US</option>
+        <option value='hi'>Hindi</option>
+        <option value='es'>Spanish</option>
+        <option value='fr'>French</option>
+        <option value='ko'>Korean</option>
+        <option value='tr'>Turkish</option>
       </select>
     </div>
     <div class='submit-div'>
       <button class='btn btn-primary submit-button'>Submit</button>
     </div>
   </div>
+  <div class='login-screen'>
+    <div class='label-div'>Buckbeak doesn't recognize you. Please sign up to continue.</div>
+    <div class='login-buttons-div'>
+      <button class='btn btn-primary signup-button'>Sign Up</button>
+      <span>Already a user? <span class="login-link">Sign In</span></span>
+    </div>
+  </div>
   <div class='transcribe-area' style='display: none;'>
     <div class='tray'>
-      <button class='button play' id='btn-play'>          
-        <i class='iplay fa-solid fa-microphone-lines' id='icon-play' style='display: none;'></i>
-        <i class='iplay fa-solid fa-microphone-lines-slash' id='icon-pause'></i>
+      <button class='button play' id='btn-play' disabled>          
+        <i class='iplay fa-solid fa-microphone-lines' id='icon-play'></i>
+        <i class='iplay fa-solid fa-microphone-lines-slash' id='icon-pause' style='display: none;'></i>
       </button>
-      <button class='button play'>
+      <button class='button play' id='btn-stop' disabled>
         <i class='iplay fa-solid fa-circle-stop'></i>
       </button>
-      <button class='button play'>
+      <button class='button play' id='btn-highlight' disabled>
         <i class="fa-solid fa-highlighter"></i>
       </button>
-      <button id='hide-scribe' class='button play'>
+      <button class='button play' id='hide-scribe' disabled>
         <i class='iplay fa-solid fa-file-lines'></i>
       </button>
-      <button class='button play'>
+      <button class='button play' id='to-buckbeak' disabled>
         <i class='iplay fa-solid fa-up-right-from-square'></i>
       </button>
     </div>
     <div class='desc-text' id='time-text'>
+    </div>
+    <div class="alert" id="error-box" style="display: none;">
+      <span class="closebtn">&times;</span> 
+      <strong id="err-span"></strong>
     </div>
     <div id='conversation-block' class='transcript-area'>
     </div>

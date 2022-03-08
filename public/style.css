@@ -146,12 +146,17 @@ div button.play {
   cursor: pointer;
   z-index: 999;
 }
-div button:active{
+div button:active {
   transform: scale(0.97);
+}
+div button:disabled {
+  cursor: default;
+  background: lightgrey;
+  transform: none;
 }
 .wrapper .transcript-area {
   overflow-y: auto;
-  width: 338px;
+  width: 360px;
   height: 400px;
   padding-left: 5px;
   padding-right: 5px;
@@ -233,6 +238,11 @@ form .textarea textarea:focus::placeholder{
   height: 485px;
   position: relative;
 }
+.login-screen {
+  width: 360px;
+  height: 485px;
+  position: relative;  
+}
 .label-div {
   width: 100%;
   margin: 0;
@@ -242,6 +252,20 @@ form .textarea textarea:focus::placeholder{
   left: 50%;
   -ms-transform: translate(-50%);
   transform: translate(-50%);
+}
+.login-buttons-div {
+  margin: 0;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%);
+  transform: translate(-50%);
+}
+.login-link {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
 }
 .lang-select-div {
   margin: 0;
@@ -265,10 +289,45 @@ form .textarea textarea:focus::placeholder{
 .submit-button {
   width: 150px;
 }
+.signup-button {
+  width: 150px;
+}
 p.time {
   font-size: small;
   font-weight: lighter;
   margin-top: 5px;
   margin-bottom: 0px;
   width: 100%;
+}
+#error-box {
+  padding: 8px;
+  background-color: rgba(255, 0, 0, 0.8);
+  color: white;
+  border-radius: 15px;
+  border-style: solid;
+  border-color: #5e0207;
+  border-width: 1px;
+  z-index: 2999;
+  box-shadow: 0px 5px 25px rgba(0,0,0,0.3);
+  display: 'none';
+}
+
+.closebtn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 24px;
+  line-height: 21px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.closebtn:hover {
+  color: black;
+}
+
+div.cross-btn {
+  float: right;
+  /*margin-top: 4%;*/
 }

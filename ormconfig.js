@@ -14,13 +14,13 @@ module.exports = {
   namingStrategy: new SnakeNamingStrategy(),
   logging: nodeEnvironment !== "production",
   entities: [
-    nodeEnvironment === "develop" ? "src/entity/**/*.ts" : "dist/entity/**/*.js"
+    "dist/entity/**/*.js"
   ],
   migrations: [
-    nodeEnvironment === "develop" ? "src/migration/**/*.ts" : "dist/migration/**/*.js"
+    "dist/migration/**/*.js"
   ],
   subscribers:
-    nodeEnvironment === "develop" ? ["src/subscriber/**/*.ts","node_modules/kafka_publisher/lib/subscriber/*.js"] : ["dist/subscriber/**/*.js","node_modules/kafka_publisher/lib/subscriber/*.js"]
+    ["dist/subscriber/**/*.js","node_modules/kafka_publisher/lib/subscriber/*.js"]
   ,
   cli: {
     entitiesDir: "src/entity",
