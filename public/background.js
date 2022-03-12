@@ -56,7 +56,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   else if(message.action === "getAccessToken") {
     chrome.cookies.get({
       name: 'buckbeak-access-token',
-      url: 'http://localhost:3000/'
+      url: 'https://yellof.in/'
     }, (cookies) => {
       let buckBeakAccessToken = null;
       if(cookies) {

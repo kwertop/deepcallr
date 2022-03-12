@@ -14,7 +14,10 @@
     "cookies"
   ],
   "host_permissions": [
-    "http://localhost:3000/"
+    "http://localhost:3000/",
+    "https://sock.yellof.in/",
+    "https://www.yellof.in/",
+    "https://yellof.in/"
   ],
   "action": {
     "default_popup": "popup.html"

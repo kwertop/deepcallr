@@ -178,7 +178,6 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
    * We forward the audio stream from the client's microphone to Deepgram's server.
    */
   socket.on("microphone-stream", (stream) => {
-    console.log("here");
     audioChunks.push(stream);
     if (dgSocket.getReadyState() === WebSocket.OPEN) {
       dgSocket.send(stream);
@@ -189,7 +188,6 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
    * clients in the room.
    */
   dgSocket.addListener("transcriptReceived", (transcription) => {
-    console.log("transcriptReceived");
     let parsedData = JSON.parse(transcription);
     if(lang === 'hi') {
       parsedData["channel"]["alternatives"][0]["transcript"] = Sanscript.t(parsedData["channel"]["alternatives"][0]["transcript"],
