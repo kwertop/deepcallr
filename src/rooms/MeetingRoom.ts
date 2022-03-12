@@ -41,14 +41,14 @@ export default class MeetingRoom {
       secretAccessKey: '9eN2OvBHl7pnxtODxouYusmIAHYzGVxI+0+AHoRJ',
       region: 'ap-south-1'
     });
-    fs.mkdir(`/var/meetdata/${this.user.userId}/${this.meetingCode}`, { recursive: true }, (err) => {
-      if (err) console.log("error while creating dir: ", err);
-    });
 	}
 
 	public async initMeetingNote(meetingApp: string, viaMeetingCode: string) {
 		this.meetingNote = await createMeetingNote(this.user.id, 'New Title', meetingApp, viaMeetingCode);
 		this.meetingCode = this.meetingNote.code;
+    fs.mkdir(`/var/meetdata/${this.user.userId}/${this.meetingCode}`, { recursive: true }, (err) => {
+      if (err) console.log("error while creating dir: ", err);
+    });
 		this.setFileNames();
 	}
 
