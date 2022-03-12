@@ -6,6 +6,7 @@ import { ELASTIC_SEARCH_HOST, NOTES_BUCKET } from "../config";
 
 import { getRepository, Repository } from "typeorm";
 const fs = require('fs');
+const rimraf = require("rimraf");
 const AWS = require('aws-sdk');
 import { Socket } from "socket.io";
 import axios from 'axios';
@@ -39,6 +40,9 @@ export default class MeetingRoom {
       accessKeyId: 'AKIAQKGYBVT4PPT4YLGU',
       secretAccessKey: '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',
       region: 'ap-south-1'
+    });
+    fs.mkdir(`/var/meetdata/${this.user.userId}/${this.meetingCode}`, { recursive: true }, (err) => {
+      if (err) console.log("error while creating dir: ", err);
     });
 	}
 
@@ -157,6 +161,10 @@ export default class MeetingRoom {
   public async setMeetingEndTime() {
     this.meetingNote.endTime = new Date();
     await getRepository(MeetingNote).save(this.meetingNote);
+  }
+
+  public delFilesAndFolders() {
+    rimraf.sync(`/var/meetdata/${this.user.userId}`);
   }
 
  	private setFileNames() {

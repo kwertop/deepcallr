@@ -220,6 +220,7 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
     meetingRoom.indexToElastic();
     socket.broadcast.to(room).emit("bye", socket.id);
     meetingRoom.unsetTimer();
+    meetingRoom.delFilesAndFolders();
   });
 }
 
