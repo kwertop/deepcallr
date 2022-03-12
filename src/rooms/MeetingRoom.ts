@@ -23,6 +23,8 @@ export default class MeetingRoom {
 	private subscriptionRepo: Repository<Subscription>;
 	private minutesPerMonth: number;
   private fullTranscription: string;
+  private captions: Array<any>;
+  public displayTranscript: Array<any>;
 
 	constructor(user: UserAccount, activeSubscription: Subscription, minutesPerMonth: number) {
 		this.user = user;
@@ -31,6 +33,8 @@ export default class MeetingRoom {
 		this.minutesPerMonth = minutesPerMonth;
 		this.subscriptionRepo = getRepository(Subscription);
     this.fullTranscription = "";
+    this.captions = [];
+    this.displayTranscript = [];
     AWS.config.update({
       accessKeyId: 'AKIAQKGYBVT4PPT4YLGU',
       secretAccessKey: '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',
@@ -83,8 +87,8 @@ export default class MeetingRoom {
     });
 	}
 
-	public saveCaptionsToDisk(captions: Array<any>) {
-		fs.writeFileSync(this.captionsFileName, JSON.stringify(captions, null, 2) , 'utf-8');
+	public saveCaptionsToDisk() {
+		fs.writeFileSync(this.captionsFileName, JSON.stringify(this.displayTranscript, null, 2) , 'utf-8');
 	}
 
 	public async uploadFilesToS3 () {
@@ -105,21 +109,21 @@ export default class MeetingRoom {
 				key: 'captions.json'
 			}
 		]
-		for(const fileToUpload of filesToUpload) {
-			const fileName = fileToUpload.fileName;
-			const key = fileToUpload.key;
-			fs.readFile(fileName, async (err, data) => {
-	      if (err) { throw err; }
-	      let params = { Bucket: NOTES_BUCKET, Key: `${this.user.userId}/${this.meetingNote.code}/${key}`, Body: data };
-	      await new AWS.S3().putObject(params, (err, data) => {
-	       if (err) {
-	         console.log(err)
-	       }
-	       else {
-	         console.log("Successfully uploaded data to myBucket/myKey");
-	       }
-	      });
-	    });
+    for(const fileToUpload of filesToUpload) {
+  	  const fileName = fileToUpload.fileName;
+  	  const key = fileToUpload.key;
+    	fs.readFile(fileName, async (err, data) => {
+        if (err) { throw err; }
+        let params = { Bucket: NOTES_BUCKET, Key: `${this.user.userId}/${this.meetingNote.code}/${key}`, Body: data };
+        await new AWS.S3().putObject(params, (err, data) => {
+         if (err) {
+           console.log(err)
+         }
+         else {
+           console.log("Successfully uploaded data to myBucket/myKey");
+         }
+        });
+      });
 		}
 	}
 
@@ -136,6 +140,23 @@ export default class MeetingRoom {
         'Content-Type': 'application/json'
       }
     });
+  }
+
+  public flushCaptions() {
+    this.captions = [];
+  }
+
+  public pushIntoCaptions(caption: any) {
+    this.captions.push(caption);
+  }
+
+  public getCaptions() {
+    return this.captions;
+  }
+
+  public async setMeetingEndTime() {
+    this.meetingNote.endTime = new Date();
+    await getRepository(MeetingNote).save(this.meetingNote);
   }
 
  	private setFileNames() {

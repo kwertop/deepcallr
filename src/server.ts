@@ -114,12 +114,28 @@ function handle_connection(socket: Socket) {
         const dialogue = JSON.parse(data);
         const newLine = dialogue["time"] + ", " + dialogue["speaker"] + ": " + dialogue["transcript"] + "\r\n";
         meetingRoom.appendDialog(newLine);
+        let transcript = {
+          speaker: dialogue["speaker"],
+          startTime: dialogue["time"],
+          sentence: dialogue["transcript"],
+          seeks: meetingRoom.getCaptions()
+        }
+        meetingRoom.displayTranscript.push(transcript);
+        meetingRoom.flushCaptions();
       });
 
       socket.on("incomplete-dialogue", (data) => {
         const dialogue = JSON.parse(data);
         const newLine = dialogue["time"] + ", " + dialogue["speaker"] + ": " + dialogue["transcript"] + "\r\n";
         meetingRoom.appendDialog(newLine);
+        let transcript = {
+          speaker: dialogue["speaker"],
+          startTime: dialogue["time"],
+          sentence: dialogue["transcript"],
+          seeks: meetingRoom.getCaptions()
+        }
+        meetingRoom.displayTranscript.push(transcript);
+        meetingRoom.flushCaptions();
       })
     }
   });
@@ -135,7 +151,6 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
   let dialogue: string = "";
   let speaker: string = "";
   let dialogueTime: string = "";
-  let captions: Array<any> = [];
   let audioChunks: Array<any> = [];
   const meetingRoom: MeetingRoom = socket.data;
 
@@ -190,7 +205,7 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
           "end": Math.floor(parsedData.start + parsedData.duration),
           "words": alternatives["transcript"]
         }
-        captions.push(caption);
+        meetingRoom.pushIntoCaptions(caption);
       }
     }
   });
@@ -200,8 +215,9 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
     if (dgSocket.getReadyState() === WebSocket.OPEN) {
       dgSocket.finish();
     }
+    meetingRoom.setMeetingEndTime();
     meetingRoom.saveAudioToDisk(audioChunks);
-    meetingRoom.saveCaptionsToDisk(captions);
+    meetingRoom.saveCaptionsToDisk();
     meetingRoom.uploadFilesToS3();
     meetingRoom.indexToElastic();
     socket.broadcast.to(room).emit("bye", socket.id);

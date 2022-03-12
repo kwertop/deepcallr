@@ -220,7 +220,7 @@ async function useWebRTCStream(lang) {
     recorder = new MediaRecorder(this.mediaStreamSource.mediaStream, options);
     if(socket == null) {
       const accessToken = window.localStorage.getItem("accessToken");
-      socket = io.connect(`http://localhost:3200?token=${buckBeakAccessToken}&lang=${lang}&meetingApp=GoogleMeet&meetingCode=vgp-jgkb-zsc`);
+      socket = io.connect(`http://172.31.4.8:3200?token=${buckBeakAccessToken}&lang=${lang}&meetingApp=GoogleMeet&meetingCode=vgp-jgkb-zsc`);
       setupRealtimeTranscription(socket, recorder);
 
       // socket.on('connect_failed', (err) => console.log(err.message));
