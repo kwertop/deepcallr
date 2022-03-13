@@ -191,11 +191,11 @@ function setupRealtimeTranscription(socket: Socket, room: Room, lang: string) {
     let parsedData = JSON.parse(transcription);
     if(lang === 'hi') {
       parsedData["channel"]["alternatives"][0]["transcript"] = Sanscript.t(parsedData["channel"]["alternatives"][0]["transcript"],
-        'devanagari', 'hk');
+        'devanagari', 'hk').toLowerCase();
     }
     let alternatives = parsedData["channel"]["alternatives"][0];
     if(alternatives["words"].length > 0 && alternatives["confidence"] > 0.4) {
-      io.to(room).emit("transcript-result", socket.id, transcription);
+      io.to(room).emit("transcript-result", socket.id, JSON.stringify(parsedData));
       if(parsedData.is_final) {
         let caption = {
           "start": Math.floor(parsedData.start),
