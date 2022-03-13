@@ -130,7 +130,7 @@ function handle_connection(socket: Socket) {
         meetingRoom.appendDialog(newLine);
         let transcript = {
           speaker: dialogue["speaker"],
-          startTime: dialogue["time"],
+          startTime: meetingRoom.getCaptions()[0].start,
           sentence: dialogue["transcript"],
           seeks: meetingRoom.getCaptions()
         }
