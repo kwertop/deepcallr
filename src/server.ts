@@ -7,7 +7,7 @@ import { Socket } from "socket.io";
 import { Room } from "socket.io-adapter";
 import cors from 'cors';
 
-const deepGramKey = process.env.DG_KEY || "5ef9c14df93cf250e88f7418e37ec301cfb90cf4";
+const deepGramKey = process.env.DG_KEY || "";
 
 if (deepGramKey === "") {
   throw "You must define deepGramKey in your .env file";
